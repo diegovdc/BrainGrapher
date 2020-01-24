@@ -41,7 +41,7 @@ class Graph {
     renderModeRadio.addItem("Shaded", 3);
     renderModeRadio.addItem("Triangles", 4);
                 
-    renderModeRadio.activate(0);
+    renderModeRadio.activate(2);
 
     scaleRadio = controlP5.addRadioButton("SCALE MODE", 104, 36);
     scaleRadio.setColorForeground(color(255));

@@ -6,12 +6,12 @@
 // Latest source code is on https://github.com/kitschpatrol/Processing-Brain-Grapher
 // Created by Eric Mika in Fall 2010, updates Spring 2012, early 2014, and Spring 2016.
 
-import processing.serial.*;
 import controlP5.*;
+import oscP5.*;
 
 ControlP5 controlP5;
+OscP5 oscP5;
 
-Serial serial;
 
 Channel[] channels = new Channel[11];
 Monitor[] monitors = new Monitor[10];
@@ -24,22 +24,13 @@ String scaleMode;
 
 void setup() {
   // Set up window
-  size(1024, 768);
+  size(2048, 1536);
   frameRate(60);
   smooth();
   surface.setTitle("Processing Brain Grapher");  
 
-  // Set up serial connection
-  println("Find your Arduino in the list below, note its [index]:\n");
   
-  for (int i = 0; i < Serial.list().length; i++) {
-    println("[" + i + "] " + Serial.list()[i]);
-  }
-  
-  // Put the index found above here:
-  serial = new Serial(this, Serial.list()[0], 9600);
-
-  serial.bufferUntil(10);
+  oscP5 = new OscP5(this, 12001);
 
   // Set up the ControlP5 knobs and dials
   controlP5 = new ControlP5(this);
@@ -107,7 +98,7 @@ void draw() {
   // Update and draw the connection light
   connectionLight.update();
   connectionLight.draw();
-
+ 
   // Update and draw the monitors
   for (int i = 0; i < monitors.length; i++) {
     monitors[i].update();
@@ -115,38 +106,16 @@ void draw() {
   }
 }
 
-void serialEvent(Serial p) {
-  // Split incoming packet on commas
-  // See https://github.com/kitschpatrol/Arduino-Brain-Library/blob/master/README for information on the CSV packet format
-  
-  String incomingString = p.readString().trim();
-  print("Received string over serial: ");
-  println(incomingString);  
-  
-  String[] incomingValues = split(incomingString, ',');
-
-  // Verify that the packet looks legit
-  if (incomingValues.length > 1) {
-    packetCount++;
-
-    // Wait till the third packet or so to start recording to avoid initialization garbage.
-    if (packetCount > 3) {
-      
-      for (int i = 0; i < incomingValues.length; i++) {
-        String stringValue = incomingValues[i].trim();
-
-      int newValue = Integer.parseInt(stringValue);
-
-        // Zero the EEG power values if we don't have a signal.
-        // Can be useful to leave them in for development.
-        if ((Integer.parseInt(incomingValues[0]) == 200) && (i > 2)) {
-          newValue = 0;
-        }
-
-        channels[i].addDataPoint(newValue);
-      }
+void oscEvent(OscMessage msg) {
+  if (msg.addrPattern().equals("/p5_clases")) {
+    for (int i = 0; i < 5 /*clases*/; i++) {
+      //println(msg.get(i).intValue());
+      println(i);
+      channels[i + 1].addDataPoint(msg.get(i).intValue());     
     }
-  } 
+    //x = theOscMessage.get(0).intValue();
+    //y = theOscMessage.get(1).intValue();
+  }
 }
 
 
