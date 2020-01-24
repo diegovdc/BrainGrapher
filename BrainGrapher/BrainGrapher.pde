@@ -29,7 +29,7 @@ void setup() {
   smooth();
   surface.setTitle("Processing Brain Grapher");  
 
-  
+  // puerto OSC
   oscP5 = new OscP5(this, 12001);
 
   // Set up the ControlP5 knobs and dials
@@ -109,12 +109,9 @@ void draw() {
 void oscEvent(OscMessage msg) {
   if (msg.addrPattern().equals("/p5_clases")) {
     for (int i = 0; i < 5 /*clases*/; i++) {
-      //println(msg.get(i).intValue());
-      println(i);
+      // el canal 0 es signal quality, que no se grafica, por eso sumamos 1
       channels[i + 1].addDataPoint(msg.get(i).intValue());     
     }
-    //x = theOscMessage.get(0).intValue();
-    //y = theOscMessage.get(1).intValue();
   }
 }
 
